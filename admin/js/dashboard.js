@@ -1,22 +1,44 @@
 import { db } from '../../js/firebase-config.js';
-import { collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, query, where, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// دالة التجديد السريع من الداشباورد
+const auth = getAuth();
+// دالة التجديد السريع من الداشباورد المعدلة لتحديث الأسعار التراكمية
 window.renewSubFromDashboard = async function(companyId) {
   if (confirm("هل تريد تجديد الاشتراك لهذه الشركة لمدة سنة إضافية؟")) {
     try {
       const companyRef = doc(db, "users", companyId);
-      const newExpiryDate = new Date();
-      newExpiryDate.setFullYear(newExpiryDate.getFullYear() + 1); // تمديد سنة كاملة
+      const companySnap = await getDoc(companyRef);
 
-      await updateDoc(companyRef, {
-        subscriptionStatus: "active",
-        expiryDate: newExpiryDate.toISOString()
-      });
+      if (companySnap.exists()) {
+        const companyData = companySnap.data();
+        
+        // جلب سعر الشهر الحالي للشركة
+        const monthlyPrice = companyData.monthlyPrice || (companyData.subscriptionPrice / 12 || 0);
+        
+        const currentExpiry = new Date(companyData.expiryDate);
+        const today = new Date();
+        
+        // تحديد نقطة انطلاق التمديد (لو منتهي يبدأ من اليوم، لو ساري يمتد على القديم)
+        let baseDate = currentExpiry > today ? currentExpiry : today;
+        const newExpiryDate = new Date(baseDate);
+        newExpiryDate.setFullYear(newExpiryDate.getFullYear() + 1); // إضافة سنة كاملة (12 شهر)
 
-      alert("تم تجديد الاشتراك بنجاح!");
+        // إضافة قيمة السنة الجديدة إلى التكلفة الإجمالية التراكمية
+        const newTotalPrice = (companyData.subscriptionPrice || 0) + (monthlyPrice * 12);
+        const newTotalMonths = (companyData.durationMonths || 12) + 12;
+
+        await updateDoc(companyRef, {
+          subscriptionStatus: "active",
+          expiryDate: newExpiryDate.toISOString(),
+          subscriptionPrice: newTotalPrice,
+          durationMonths: newTotalMonths
+        });
+
+        alert("تم تجديد الاشتراك بنجاح وتحديث إجمالي الأرباح!");
+      }
     } catch (error) {
-      console.error("Error renewing subscription: ", error);
+      console.error("Error renewing subscription from dashboard: ", error);
       alert("حدث خطأ أثناء التجديد.");
     }
   }
@@ -28,6 +50,7 @@ export function renderAdminAnalytics() {
     
     onSnapshot(q, (querySnapshot) => {
       let activeCount = 0;
+      let nearingExpiryCount = 0; // عداد الاشتراكات التي تقترب من الانتهاء
       let expiredCount = 0;
       let totalRevenue = 0;
 
@@ -45,14 +68,17 @@ export function renderAdminAnalytics() {
         // حساب السعر الإجمالي لكل الاشتراكات (سارية + منتهية) بدون شروط
         totalRevenue += company.subscriptionPrice || 0;
 
-        if (currentDate <= expiry) {
-          activeCount++;
-        } else {
-          expiredCount++;
-        }
-
         const timeDiff = expiry - currentDate;
         const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+        // تصنيف حالة الاشتراك بناءً على الأيام المتبقية للرسم البياني
+        if (daysLeft < 0) {
+          expiredCount++;
+        } else if (daysLeft <= 30) {
+          nearingExpiryCount++; // ساري ولكن باقي 30 يوم أو أقل
+        } else {
+          activeCount++; // ساري وأكثر من 30 يوم
+        }
 
         // إظهار التنبيه إذا كان باقي 30 يوم أو أقل أو منتهي
         if (alertContainer && daysLeft <= 30) {
@@ -83,11 +109,11 @@ export function renderAdminAnalytics() {
 
       // تحديث الأرقام والإحصائيات في واجهة المستخدم
       document.getElementById("totalCompanies").innerText = querySnapshot.size;
-      document.getElementById("activeSubs").innerText = activeCount;
+      document.getElementById("activeSubs").innerText = activeCount + nearingExpiryCount; // عرض إجمالي المشتركين الفعليين حالياً
       document.getElementById("expiredSubs").innerText = expiredCount;
       document.getElementById("totalRevenue").innerText = `${totalRevenue} ج.م`;
 
-      // رسم الـ Pie Chart
+      // رسم الـ Pie Chart بالتحديث الجديد (3 حالات)
       const ctx = document.getElementById('subscriptionPieChart').getContext('2d');
       if (window.pieChartInstance) {
         window.pieChartInstance.destroy();
@@ -96,10 +122,10 @@ export function renderAdminAnalytics() {
       window.pieChartInstance = new Chart(ctx, {
         type: 'pie',
         data: {
-          labels: ['اشتراكات سارية', 'اشتراكات منتهية'],
+          labels: ['اشتراكات سارية', 'قربت على الانتهاء', 'اشتراكات منتهية'],
           datasets: [{
-            data: [activeCount, expiredCount],
-            backgroundColor: ['#198754', '#dc3545'],
+            data: [activeCount, nearingExpiryCount, expiredCount],
+            backgroundColor: ['#198754', '#ffc107', '#dc3545'], // أخضر، أصفر تحذيري، أحمر
             borderWidth: 1
           }]
         },
@@ -120,6 +146,7 @@ export function renderAdminAnalytics() {
 
 document.addEventListener("DOMContentLoaded", () => {
   renderAdminAnalytics();
+  displayAdminProfile();
   
   const logoutBtn = document.getElementById("logoutBtn");
   if(logoutBtn) {
@@ -129,3 +156,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// دالة جلب وعرض اسم الأدمن الحالي
+function displayAdminProfile() {
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            try {
+                // جلب مستند الأدمن باستخدام الـ UID الخاص به
+                const adminRef = doc(db, "users", user.uid);
+                const adminSnap = await getDoc(adminRef);
+
+                if (adminSnap.exists()) {
+                    const adminData = adminSnap.data();
+                    // قراءة الحقل name كما هو في الفايربيز عندك
+                    const fullAdminName = adminData.name || adminData.fullName || "المسؤول";
+
+                    // تحديث واجهة المستخدم
+                    const nameElem = document.getElementById("adminName");
+                    const avatarElem = document.getElementById("adminAvatar");
+
+                    if (nameElem) {
+                        nameElem.innerText = fullAdminName;
+                    }
+                    if (avatarElem) {
+                        // أخذ أول حرف من الاسم وعرضه كـ الكابيتال
+                        avatarElem.innerText = fullAdminName.charAt(0).toUpperCase();
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching admin profile:", error);
+            }
+        } else {
+            // لو مفيش مستخدم مسجل دخول، يرجعه لصفحة الدخول فوراً لحماية اللوحة
+            window.location.href = "../auth.html";
+        }
+    });
+}

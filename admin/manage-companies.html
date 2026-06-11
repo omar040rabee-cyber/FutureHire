@@ -6,18 +6,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة الشركات - FutureHire</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-3">
         <div class="container">
-            <a class="navbar-brand" href="#">FutureHire - الأدمن</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html">الرئيسية</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="manage-companies.html">إدارة الشركات</a></li>
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="#">
+                <i class="bi bi-rocket-takeoff-fill"></i>
+                <span>FutureHire <span
+                        class="badge bg-light text-primary border fs-6 fw-normal ms-1">الأدمن</span></span>
+            </a>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="adminNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2 mt-3 mt-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link rounded-3 px-3 d-flex align-items-center gap-2 fw-semibold"
+                            href="dashboard.html">
+                            <i class="bi bi-speedometer2"></i> الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active rounded-3 px-3 d-flex align-items-center gap-2 text-secondary fw-semibold"
+                            href="manage-companies.html">
+                            <i class="bi bi-building"></i> إدارة الشركات
+                        </a>
+                    </li>
                 </ul>
+
+                <div class="d-flex align-items-center gap-3 border-top pt-3 pt-lg-0 border-lg-0 mt-3 mt-lg-0">
+                    <div class="d-flex align-items-center gap-2 me-2">
+                        <div id="adminAvatar"
+                            class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                            style="width: 35px; height: 35px;">A</div>
+                        <span id="adminName" class="text-dark fw-medium fs-6 d-none d-sm-inline">جاري التحميل...</span>
+                    </div>
+                    <button id="logoutBtn"
+                        class="btn btn-outline-danger btn-sm rounded-2 px-3 d-flex align-items-center gap-2 fw-medium">
+                        <i class="bi bi-box-arrow-right"></i> تسجيل خروج
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -42,7 +78,7 @@
                             <input type="password" class="form-control" id="companyPassword" required>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">سعر الاشتراك (ج.م)</label>
+                            <label class="form-label">سعر الاشتراك/شهر (ج.م)</label>
                             <input type="number" class="form-control" id="subPrice" required>
                         </div>
                         <div class="col-md-3">
@@ -66,8 +102,9 @@
                             <tr>
                                 <th>اسم الشركة</th>
                                 <th>البريد الإلكتروني</th>
-                                <th>قيمة الاشتراك</th>
-                                <th>تاريخ الانتهاء</th> > <th>الحالة</th>
+                                <th>اجمالى الاشتراك (ج.م)</th>
+                                <th>تاريخ الانتهاء</th>
+                                <th>الحالة</th>
                                 <th>الإجراءات</th>
                             </tr>
                         </thead>
@@ -104,7 +141,7 @@
                             <input type="email" class="form-control" id="editCompanyEmail" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">سعر الاشتراك (ج.م)</label>
+                            <label class="form-label">سعر الاشتراك/شهر (ج.م)</label>
                             <input type="number" class="form-control" id="editSubPrice" required>
                         </div>
                         <button type="submit" class="btn btn-success">حفظ التعديلات</button>
