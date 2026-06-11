@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الشركات - FutureHire</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">FutureHire - الأدمن</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">الرئيسية</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="manage-companies.html">إدارة الشركات</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+
+        <div class="card mb-5">
+            <div class="card-header bg-primary text-white">إضافة حساب شركة جديد</div>
+            <div class="card-body">
+                <form id="addCompanyForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">اسم الشركة</label>
+                            <input type="text" class="form-control" id="companyName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="companyEmail" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">كلمة المرور</label>
+                            <input type="password" class="form-control" id="companyPassword" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">سعر الاشتراك (ج.م)</label>
+                            <input type="number" class="form-control" id="subPrice" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">مدة الاشتراك (بالأشهر)</label>
+                            <input type="number" class="form-control" id="subDuration" value="12" required>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">إضافة الشركة</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">قائمة الشركات المسجلة</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>اسم الشركة</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>قيمة الاشتراك</th>
+                                <th>تاريخ الانتهاء</th> > <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="companiesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <button id="prevBtn" class="btn btn-outline-secondary" disabled>السابق</button>
+                    <button id="nextBtn" class="btn btn-outline-secondary">التالي</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="editCompanyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تعديل بيانات الشركة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCompanyForm">
+                        <input type="hidden" id="editCompanyId">
+                        <div class="mb-3">
+                            <label class="form-label">اسم الشركة</label>
+                            <input type="text" class="form-control" id="editCompanyName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="editCompanyEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">سعر الاشتراك (ج.م)</label>
+                            <input type="number" class="form-control" id="editSubPrice" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">حفظ التعديلات</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/manage-companies.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

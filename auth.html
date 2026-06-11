@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutureHire - الانضمام إلى المنصة</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-light d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card border-0 shadow-lg p-4">
+                    <div class="text-center mb-4">
+                        <a href="index.html" class="h3 fw-bold text-decoration-none text-primary">Future<span
+                                class="text-dark">Hire</span></a>
+                        <p class="text-muted small mt-2" id="auth-subtitle">سجل دخولك لمتابعة مستقبلك المهني</p>
+                    </div>
+
+                    <div class="nav nav-pills nav-justified mb-4" id="auth-tabs">
+                        <button class="nav-link active" id="tab-login" onclick="switchMode('login')">تسجيل
+                            الدخول</button>
+                        <button class="nav-link" id="tab-register" onclick="switchMode('register')">إنشاء حساب
+                            جديد</button>
+                    </div>
+
+                    <div id="auth-alert" class="alert d-none" role="alert"></div>
+
+                    <form id="auth-form">
+                        <div class="mb-3 d-none animate-field" id="name-field">
+                            <label class="form-label small fw-bold">الاسم بالكامل / اسم الشركة</label>
+                            <input type="text" id="auth-name" class="form-control" placeholder="أدخل الاسم">
+                        </div>
+
+                        <div class="mb-3 d-none animate-field" id="role-field">
+                            <label class="form-label small fw-bold">نوع الحساب</label>
+                            <select id="auth-role" class="form-select">
+                                <option value="user">باحث عن عمل (User)</option>
+                                <option value="company">شركة (Company)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">البريد الإلكتروني</label>
+                            <input type="email" id="auth-email" class="form-control" placeholder="name@example.com"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">كلمة المرور</label>
+                            <input type="password" id="auth-password" class="form-control" placeholder="••••••••"
+                                required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mt-2"
+                            id="submit-btn">دخول</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchMode(mode) {
+            const nameField = document.getElementById('name-field');
+            const roleField = document.getElementById('role-field');
+            const submitBtn = document.getElementById('submit-btn');
+            const subtitle = document.getElementById('auth-subtitle');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+
+            if (mode === 'register') {
+                nameField.classList.remove('d-none');
+                roleField.classList.remove('d-none');
+                submitBtn.innerText = 'إنشاء الحساب';
+                subtitle.innerText = 'ابدأ الآن وجهز ملفك الشخصي للمستقبل';
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+            } else {
+                nameField.classList.add('d-none');
+                roleField.classList.add('d-none');
+                submitBtn.innerText = 'دخول';
+                subtitle.innerText = 'سجل دخولك لمتابعة مستقبلك المهني';
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialMode = urlParams.get('mode');
+        if (initialMode === 'register') { switchMode('register'); }
+    </script>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+
+</html>
+</body>
+
+</html>

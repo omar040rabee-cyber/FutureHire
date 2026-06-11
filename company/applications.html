@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلبات التقديم الواردة - FutureHire</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="dashboard.html">Future<span class="text-white">Hire</span></a>
+            <div class="collapse navbar-collapse" id="companyNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">الرئيسية</a></li>
+                    <li class="nav-item"><a class="nav-link" href="add-job.html">إضافة وظيفة</a></li>
+                    <li class="nav-item"><a class="nav-link" href="manage-jobs.html">إدارة الوظائف</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="applications.html">طلبات التقديم</a></li>
+                    <li class="nav-item"><a class="nav-link" href="accepted-list.html">المقبولين</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="card border-0 shadow-sm p-4">
+            <h4 class="fw-bold mb-4"><i class="fa-solid fa-file-signature text-primary me-2"></i> طلبات التوظيف الواردة لشركتك</h4>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>اسم المتقدم</th>
+                            <th>الوظيفة المطلوبة</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>رابط LinkedIn</th>
+                            <th>السيرة الذاتية (CV)</th>
+                            <th>الحالة الحالية</th>
+                            <th class="text-center">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applications-table">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">جاري تحميل طلبات التقديم...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav class="d-flex justify-content-between align-items-center mt-4">
+                <button class="btn btn-outline-secondary btn-sm fw-bold" id="app-prev-btn" disabled>السابق</button>
+                <span class="text-muted small" id="app-page-info">الصفحة 1</span>
+                <button class="btn btn-outline-secondary btn-sm fw-bold" id="app-next-btn" disabled>التالي</button>
+            </nav>
+        </div>
+    </div>
+
+    <script type="module" src="js/applications-manager.js"></script>
+</body>
+</html>
