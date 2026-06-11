@@ -42,9 +42,11 @@ export function renderAdminAnalytics() {
         const company = docSnap.data();
         const expiry = new Date(company.expiryDate);
 
+        // حساب السعر الإجمالي لكل الاشتراكات (سارية + منتهية) بدون شروط
+        totalRevenue += company.subscriptionPrice || 0;
+
         if (currentDate <= expiry) {
           activeCount++;
-          totalRevenue += company.subscriptionPrice || 0;
         } else {
           expiredCount++;
         }

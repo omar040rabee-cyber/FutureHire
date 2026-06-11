@@ -7,48 +7,27 @@ import {
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ==========================================
-// 1. تسجيل حساب جديد (سواء باحث عن عمل أو شركة)
+// 1. تسجيل حساب باحث عن عمل جديد (User Only)
 // ==========================================
-export async function registerAccount(email, password, fullName, role) {
+export async function registerUser(email, password, fullName) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // بيانات مبدئية مشتركة
-    const userData = {
+    // حفظ البيانات في Firestore وتعيين الـ role تلقائياً كـ "user"
+    await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
       fullName: fullName,
       email: email,
-      role: role,
+      role: "user", // افتراضي لأي شخص يسجل من الواجهة العامة
+      phone: "",
+      cvUrl: "",
+      portfolioUrl: "",
       createdAt: new Date().toISOString()
-    };
+    });
 
-    // تخصيص البيانات حسب نوع الحساب
-    if (role === "company") {
-      userData.subscriptionStatus = "active";
-      userData.subscriptionPrice = 1000; // السعر الافتراضي
-      
-      // اشتراك لمدة سنة افتراضية للشركات المسجلة ذاتياً
-      const expiry = new Date();
-      expiry.setFullYear(expiry.getFullYear() + 1);
-      userData.expiryDate = expiry.toISOString();
-    } else {
-      userData.phone = "";
-      userData.cvUrl = "";
-      userData.portfolioUrl = "";
-    }
-
-    // حفظ البيانات في Firestore
-    await setDoc(doc(db, "users", user.uid), userData);
-
-    alert("تم إنشاء الحساب بنجاح!");
-    
-    // التوجيه الذكي بعد التسجيل
-    if (role === "company") {
-        window.location.href = "company/dashboard.html";
-    } else {
-        window.location.href = "user/explore.html"; 
-    }
+    alert("تم إنشاء حسابك بنجاح! أهلاً بك في FutureHire.");
+    window.location.href = "user/explore.html"; // توجيهه لصفحة استكشاف الوظائف مباشرة
   } catch (error) {
     console.error("Error during registration: ", error);
     alert("حدث خطأ أثناء التسجيل: " + error.message);
@@ -56,13 +35,14 @@ export async function registerAccount(email, password, fullName, role) {
 }
 
 // ==========================================
-// 2. تسجيل الدخول والتوجيه الذكي
+// 2. تسجيل الدخول والتوجيه الذكي (لكل الأدوار)
 // ==========================================
 export async function loginUser(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
+    // جلب بيانات الحساب من Firestore لمعرفة الـ Role والتوجيه لمكانه الصحيح
     const userDoc = await getDoc(doc(db, "users", user.uid));
     
     if (userDoc.exists()) {
@@ -72,17 +52,19 @@ export async function loginUser(email, password) {
       if (role === "admin") {
         window.location.href = "admin/dashboard.html";
       } else if (role === "company") {
+        // إذا كان حساب شركة، نتأكد أولاً أن الاشتراك نشط وساري
         if (userData.subscriptionStatus === "active") {
           window.location.href = "company/dashboard.html";
         } else {
-          alert("عذراً، اشتراك الشركة منتهي. يرجى التواصل مع الإدارة للتجديد.");
+          alert("عذراً، اشتراك الشركة منتهي أو غير نشط. يرجى التواصل مع الإدارة للتجديد.");
           await signOut(auth);
         }
       } else {
+        // لو مستخدم عادي (User)
         window.location.href = "user/explore.html";
       }
     } else {
-      alert("لم يتم العثور على بيانات لهذا المستخدم.");
+      alert("لم يتم العثور على بيانات إضافية لهذا المستخدم في قاعدة البيانات.");
     }
   } catch (error) {
     console.error("Error during login: ", error);
@@ -91,21 +73,22 @@ export async function loginUser(email, password) {
 }
 
 // ==========================================
-// 3. التقاط حدث إرسال النموذج (Form Submit)
+// 3. التحكم في إرسال النموذج (Form Submission)
 // ==========================================
 document.getElementById("auth-form").addEventListener("submit", async function(e) {
     e.preventDefault();
 
     const email = document.getElementById("auth-email").value;
     const password = document.getElementById("auth-password").value;
-    
-    // التحقق من النص الموجود في الزر لمعرفة المود
     const submitBtnText = document.getElementById("submit-btn").innerText;
 
     if (submitBtnText === "إنشاء الحساب") {
         const fullName = document.getElementById("auth-name").value;
-        const role = document.getElementById("auth-role").value;
-        await registerAccount(email, password, fullName, role);
+        if (!fullName.trim()) {
+            alert("يرجى إدخال الاسم بالكامل");
+            return;
+        }
+        await registerUser(email, password, fullName);
     } else {
         await loginUser(email, password);
     }

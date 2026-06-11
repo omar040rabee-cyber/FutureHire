@@ -16,48 +16,34 @@
             <div class="col-md-6 col-lg-5">
                 <div class="card border-0 shadow-lg p-4">
                     <div class="text-center mb-4">
-                        <a href="index.html" class="h3 fw-bold text-decoration-none text-primary">Future<span
-                                class="text-dark">Hire</span></a>
+                        <a href="index.html" class="h3 fw-bold text-decoration-none text-primary">Future<span class="text-dark">Hire</span></a>
                         <p class="text-muted small mt-2" id="auth-subtitle">سجل دخولك لمتابعة مستقبلك المهني</p>
                     </div>
 
                     <div class="nav nav-pills nav-justified mb-4" id="auth-tabs">
-                        <button class="nav-link active" id="tab-login" onclick="switchMode('login')">تسجيل
-                            الدخول</button>
-                        <button class="nav-link" id="tab-register" onclick="switchMode('register')">إنشاء حساب
-                            جديد</button>
+                        <button class="nav-link active" id="tab-login" onclick="switchMode('login')">تسجيل الدخول</button>
+                        <button class="nav-link" id="tab-register" onclick="switchMode('register')">إنشاء حساب جديد</button>
                     </div>
 
                     <div id="auth-alert" class="alert d-none" role="alert"></div>
 
                     <form id="auth-form">
                         <div class="mb-3 d-none animate-field" id="name-field">
-                            <label class="form-label small fw-bold">الاسم بالكامل / اسم الشركة</label>
-                            <input type="text" id="auth-name" class="form-control" placeholder="أدخل الاسم">
-                        </div>
-
-                        <div class="mb-3 d-none animate-field" id="role-field">
-                            <label class="form-label small fw-bold">نوع الحساب</label>
-                            <select id="auth-role" class="form-select">
-                                <option value="user">باحث عن عمل (User)</option>
-                                <option value="company">شركة (Company)</option>
-                            </select>
+                            <label class="form-label small fw-bold">الاسم بالكامل</label>
+                            <input type="text" id="auth-name" class="form-control" placeholder="أدخل اسمك الثلاثي">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">البريد الإلكتروني</label>
-                            <input type="email" id="auth-email" class="form-control" placeholder="name@example.com"
-                                required>
+                            <input type="email" id="auth-email" class="form-control" placeholder="name@example.com" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">كلمة المرور</label>
-                            <input type="password" id="auth-password" class="form-control" placeholder="••••••••"
-                                required>
+                            <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mt-2"
-                            id="submit-btn">دخول</button>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mt-2" id="submit-btn">دخول</button>
                     </form>
 
                 </div>
@@ -68,7 +54,6 @@
     <script>
         function switchMode(mode) {
             const nameField = document.getElementById('name-field');
-            const roleField = document.getElementById('role-field');
             const submitBtn = document.getElementById('submit-btn');
             const subtitle = document.getElementById('auth-subtitle');
             const tabLogin = document.getElementById('tab-login');
@@ -76,14 +61,12 @@
 
             if (mode === 'register') {
                 nameField.classList.remove('d-none');
-                roleField.classList.remove('d-none');
                 submitBtn.innerText = 'إنشاء الحساب';
                 subtitle.innerText = 'ابدأ الآن وجهز ملفك الشخصي للمستقبل';
                 tabRegister.classList.add('active');
                 tabLogin.classList.remove('active');
             } else {
                 nameField.classList.add('d-none');
-                roleField.classList.add('d-none');
                 submitBtn.innerText = 'دخول';
                 subtitle.innerText = 'سجل دخولك لمتابعة مستقبلك المهني';
                 tabLogin.classList.add('active');
@@ -97,9 +80,6 @@
     </script>
 
     <script type="module" src="js/auth.js"></script>
-</body>
-
-</html>
 </body>
 
 </html>

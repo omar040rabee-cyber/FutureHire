@@ -1,34 +1,58 @@
-import { db } from '../../js/firebase-config.js';
+import { db, firebaseConfig } from '../../js/firebase-config.js'; 
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
-    collection, addDoc, doc, updateDoc, deleteDoc, query, where, limit, startAfter, onSnapshot 
+    collection, setDoc, doc, updateDoc, deleteDoc, query, where, limit, startAfter, onSnapshot 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// ==========================================
 // دالة إضافة حساب شركة جديد بواسطة الأدمن
-export async function addCompanyAccount(companyName, email, password, subscriptionPrice, subscriptionDurationMonths) {
+// ==========================================
+export async function addCompanyAccount(companyName, email, password, monthlyPrice, subscriptionDurationMonths) {
     try {
         const startDate = new Date();
         const expiryDate = new Date();
-        expiryDate.setMonth(startDate.getMonth() + parseInt(subscriptionDurationMonths));
+        const months = parseInt(subscriptionDurationMonths);
+        
+        // حساب تاريخ انتهاء الاشتراك بناءً على عدد الشهور
+        expiryDate.setMonth(startDate.getMonth() + months);
 
-        await addDoc(collection(db, "users"), {
+        // حساب إجمالي سعر الاشتراك تلقائياً (سعر الشهر × عدد الشهور)
+        const totalSubscriptionPrice = parseFloat(monthlyPrice) * months;
+
+        // 1. إنشاء نسخة ثانوية معزولة من الفايربيز حتى لا يفقد الأدمن تسجيل دخوله
+        const secondaryApp = initializeApp(firebaseConfig, "SecondaryAppInstance");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        // 2. إنشاء الحساب في الـ Authentication الخاص بالنسخة المعزولة
+        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+        const companyUser = userCredential.user;
+
+        // 3. حفظ البيانات في الـ Firestore باستخدام الـ UID الناتج عن الـ Authentication
+        await setDoc(doc(db, "users", companyUser.uid), {
+            uid: companyUser.uid,
             fullName: companyName,
             email: email,
             role: "company",
             subscriptionStatus: "active",
-            subscriptionPrice: parseFloat(subscriptionPrice),
+            subscriptionPrice: totalSubscriptionPrice, // هنا يتم حفظ الإجمالي المحسوب
             createdAt: startDate.toISOString(),
             expiryDate: expiryDate.toISOString()
         });
 
+        // 4. حذف النسخة الثانوية المعزولة من الذاكرة فوراً بعد الانتهاء
+        await deleteApp(secondaryApp);
+
         alert("تم إضافة حساب الشركة وتفعيل الاشتراك بنجاح!");
-        // لا داعي لاستدعاء loadCompanies() هنا، لأن onSnapshot سيحدث الجدول تلقائياً
     } catch (error) {
         console.error("Error adding company: ", error);
-        alert("حدث خطأ: " + error.message);
+        alert("حدث خطأ أثناء إضافة الشركة: " + error.message);
     }
 }
 
+// ==========================================
 // دالة حذف شركة
+// ==========================================
 export async function deleteCompany(companyId) {
     if (confirm("هل أنت متأكد من حذف هذه الشركة؟ سيتم حذف جميع بياناتها.")) {
         try {
@@ -40,7 +64,9 @@ export async function deleteCompany(companyId) {
     }
 }
 
+// ==========================================
 // دالة تجديد الاشتراك للشركات المنتهية
+// ==========================================
 export async function renewSubscription(companyId, additionalMonths) {
     try {
         const companyRef = doc(db, "users", companyId);
@@ -63,7 +89,7 @@ export async function renewSubscription(companyId, additionalMonths) {
 // ==========================================
 let lastVisibleCompany = null;
 const PAGE_SIZE = 5;
-let unsubscribe = null; // لتخزين مستمع التغيرات وإيقافه عند التنقل بين الصفحات
+let unsubscribe = null; 
 
 export async function loadCompanies(isNext = true) {
     let q;
@@ -75,12 +101,10 @@ export async function loadCompanies(isNext = true) {
         q = query(collection(db, "users"), where("role", "==", "company"), limit(PAGE_SIZE));
     }
 
-    // إيقاف المستمع القديم لتجنب التداخل
     if (unsubscribe) {
         unsubscribe();
     }
 
-    // الاستماع للتغيرات لحظياً على البيانات المجلوبة
     unsubscribe = onSnapshot(q, (snapshot) => {
         const tbody = document.getElementById("companiesTableBody");
         
@@ -89,7 +113,6 @@ export async function loadCompanies(isNext = true) {
             return;
         }
 
-        // حفظ مرجع لآخر عنصر للصفحة التالية
         lastVisibleCompany = snapshot.docs[snapshot.docs.length - 1];
         tbody.innerHTML = "";
 
@@ -99,7 +122,6 @@ export async function loadCompanies(isNext = true) {
             const company = doc.data();
             const expiryDate = new Date(company.expiryDate);
 
-            // حساب الفرق بالأيام
             const timeDiff = expiryDate - today;
             const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
@@ -114,7 +136,7 @@ export async function loadCompanies(isNext = true) {
                 renewButton = `<button class="btn btn-sm btn-warning" onclick="renewSubscription('${doc.id}', 12)">تجديد سنة</button>`;
             } else {
                 statusBadge = `<span class="badge bg-success">ساري</span>`;
-                renewButton = `---`;
+                renewButton = ``;
             }
 
             const formattedExpiry = expiryDate.toLocaleDateString('ar-EG');
@@ -172,8 +194,6 @@ document.getElementById("editCompanyForm").addEventListener("submit", async func
         const modalElement = document.getElementById('editCompanyModal');
         const modal = bootstrap.Modal.getInstance(modalElement);
         modal.hide();
-        
-        // سيتم تحديث الجدول لحظياً بفضل onSnapshot
     } catch (error) {
         console.error("Error updating company: ", error);
         alert("حدث خطأ أثناء التعديل.");
@@ -192,7 +212,7 @@ document.getElementById("addCompanyForm").addEventListener("submit", async funct
     const companyName = document.getElementById("companyName").value;
     const email = document.getElementById("companyEmail").value;
     const password = document.getElementById("companyPassword").value;
-    const subPrice = document.getElementById("subPrice").value;
+    const subPrice = document.getElementById("subPrice").value; // يمثل الآن سعر الشهر الواحد
     const subDuration = document.getElementById("subDuration").value;
 
     await addCompanyAccount(companyName, email, password, subPrice, subDuration);

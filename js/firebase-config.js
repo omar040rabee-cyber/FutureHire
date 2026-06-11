@@ -6,7 +6,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyAUwb4-DZmljiF_LE2RMxeuITN2lNLooKg",
   authDomain: "futurehire-d848c.firebaseapp.com",
   projectId: "futurehire-d848c",
