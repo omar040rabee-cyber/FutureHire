@@ -13,6 +13,7 @@ let pageStack = [];
 let currentPageIndex = 0;    
 let lastVisibleJob = null;
 let unsubscribeJobs = null; 
+let applicantCountListeners = {}; 
 
 // ==========================================
 // 1. مراقبة حالة تسجيل الدخول وتحديث الملف الشخصي
@@ -31,25 +32,27 @@ onAuthStateChanged(auth, async (user) => {
                 document.getElementById("companyName").innerText = name;
                 document.getElementById("companyAvatar").innerText = name.charAt(0).toUpperCase();
                 
-                // تشغيل جلب الوظائف التابعة لهذه الشركة فقط فور التأكد من الـ UID
                 loadCompanyJobs('init');
             }
         } catch (error) {
             console.error("Error fetching company details:", error);
         }
     } else {
-        // حماية الصفحة: إذا لم يسجل دخول يتم توجيهه لصفحة الدخول
         window.location.href = "../auth.html";
     }
 });
 
 // ==========================================
-// 2. دالة إضافة وظيفة جديدة للشركة الحالية
+// 2. دالة إضافة وظيفة جديدة مع تحويل المهارات لمصفوفة
 // ==========================================
 document.getElementById("addJobForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     if (!currentCompanyId) return;
+
+    // تحويل النص المدخل في السكيلز إلى مصفوفة نظيفة بدون مسافات زائدة
+    const skillsInput = document.getElementById("jobSkills").value;
+    const skillsArray = skillsInput.split(',').map(s => s.trim()).filter(s => s !== "");
 
     const jobData = {
         title: document.getElementById("jobTitle").value,
@@ -57,14 +60,16 @@ document.getElementById("addJobForm").addEventListener("submit", async function 
         type: document.getElementById("jobType").value,
         salary: parseFloat(document.getElementById("jobSalary").value),
         location: document.getElementById("jobLocation").value,
+        skills: skillsArray, // حفظ المهارات كـ Array في الفايربيز
         description: document.getElementById("jobDescription").value,
-        companyId: currentCompanyId, // ربط الوظيفة بالشركة الحالية بالملي
+        companyId: currentCompanyId,
+        status: "active", 
         createdAt: new Date().toISOString()
     };
 
     try {
         await addDoc(collection(db, "jobs"), jobData);
-        alert("تم نشر الوظيفة الجديدة بنجاح!");
+        alert("تم نشر الوظيفة الجديدة في السوق بنجاح!");
         this.reset();
     } catch (error) {
         console.error("Error adding job: ", error);
@@ -73,7 +78,7 @@ document.getElementById("addJobForm").addEventListener("submit", async function 
 });
 
 // ==========================================
-// 3. نظام جلب البيانات الفوري مع الـ Pagination الذكي
+// 3. نظام جلب البيانات الفوري وعرض بادجات المهارات
 // ==========================================
 export async function loadCompanyJobs(direction = 'init') {
     if (!currentCompanyId) return;
@@ -97,45 +102,81 @@ export async function loadCompanyJobs(direction = 'init') {
         unsubscribeJobs();
     }
 
+    Object.values(applicantCountListeners).forEach(unsub => unsub());
+    applicantCountListeners = {};
+
     unsubscribeJobs = onSnapshot(q, (snapshot) => {
         const tbody = document.getElementById("jobsTableBody");
         const nextBtn = document.getElementById("nextBtn");
         const prevBtn = document.getElementById("prevBtn");
         
         if (snapshot.empty) {
-            tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-muted">لا توجد وظائف منشورة حالياً.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-muted">لا توجد وظائف منشورة حالياً.</td></tr>`;
             if (nextBtn) nextBtn.disabled = true;
             if (prevBtn) prevBtn.disabled = true;
             return;
         }
 
-        // تخزين المستند الأول للصفحة للعودة الآمنة
         pageStack[currentPageIndex] = snapshot.docs[0];
-
         tbody.innerHTML = "";
+
         const docsToDisplay = snapshot.docs.slice(0, PAGE_SIZE);
         lastVisibleJob = docsToDisplay[docsToDisplay.length - 1];
 
         docsToDisplay.forEach((docSnap) => {
             const job = docSnap.data();
+            const jobId = docSnap.id;
             const dateFormatted = new Date(job.createdAt).toLocaleDateString('ar-EG');
+            
+            const jobStatus = job.status || "active"; 
+            const isPaused = jobStatus === "paused";
+            
+            const statusBadge = isPaused 
+                ? `<span class="badge bg-warning text-dark"><i class="bi bi-pause-circle-fill me-1"></i> موقوفة</span>`
+                : `<span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> نشطة</span>`;
+
+            const toggleButton = isPaused
+                ? `<button class="btn btn-sm btn-outline-success me-1" onclick="toggleJobStatus('${jobId}', 'active')"><i class="bi bi-play-fill"></i></button>`
+                : `<button class="btn btn-sm btn-outline-warning me-1" onclick="toggleJobStatus('${jobId}', 'paused')"><i class="bi bi-pause-fill"></i></button>`;
+
+            // تحويل مصفوفة المهارات لبادجات HTML صغيرة تحت اسم الوظيفة
+            const skillsBadges = (job.skills || []).map(skill => 
+                `<span class="badge bg-light text-primary border border-primary-subtle me-1 mt-1" style="font-size: 0.75rem;">${skill}</span>`
+            ).join('');
+
+            // تجهيز نص المهارات مدمج بـ فاصلة لإرساله للمودال عند التعديل بأمان
+            const skillsEscapedString = (job.skills || []).join(', ');
 
             tbody.innerHTML += `
                 <tr>
-                    <td class="fw-bold text-dark">${job.title}</td>
+                    <td class="text-start ps-3">
+                        <div class="fw-bold text-dark fs-6">${job.title}</div>
+                        <div class="d-flex flex-wrap mt-1">${skillsBadges || '<small class="text-muted">لم تحدد مهارات</small>'}</div>
+                    </td>
                     <td><span class="badge bg-light text-secondary border px-2 py-1">${job.department}</span></td>
                     <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">${job.type}</span></td>
-                    <td class="text-success fw-medium">${job.salary} ج.م</td>
+                    <td><span id="count-${jobId}" class="badge bg-dark rounded-pill px-3 py-1.5 fw-bold">0</span></td>
+                    <td>${statusBadge}</td>
                     <td>${dateFormatted}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-info me-1" onclick="openEditJobModal('${docSnap.id}', '${job.title}', '${job.department}', '${job.type}', '${job.salary}', '${job.location}', \`${job.description.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)"><i class="bi bi-pencil"></i> تعديل</button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteJob('${docSnap.id}')"><i class="bi bi-trash"></i> حذف</button>
+                        <div class="d-flex justify-content-center">
+                            ${toggleButton}
+                            <button class="btn btn-sm btn-outline-info me-1" onclick="openEditJobModal('${jobId}', '${job.title}', '${job.department}', '${job.type}', '${job.salary}', '${job.location}', \`${job.description.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`, '${skillsEscapedString}')"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteJob('${jobId}')"><i class="bi bi-trash"></i></button>
+                        </div>
                     </td>
                 </tr>
             `;
+
+            const appQuery = query(collection(db, "applications"), where("jobId", "==", jobId));
+            applicantCountListeners[jobId] = onSnapshot(appQuery, (appSnapshot) => {
+                const countElem = document.getElementById(`count-${jobId}`);
+                if (countElem) {
+                    countElem.innerText = appSnapshot.size;
+                }
+            }, (err) => console.error("Error fetching applicants count:", err));
         });
 
-        // تشغيل أزرار التنقل الذكية بحسب الـ PAGE_SIZE + 1
         if (nextBtn) nextBtn.disabled = snapshot.docs.length <= PAGE_SIZE;
         if (prevBtn) prevBtn.disabled = currentPageIndex === 0;
 
@@ -145,9 +186,27 @@ export async function loadCompanyJobs(direction = 'init') {
 }
 
 // ==========================================
-// 4. فتح الـ Modal وتعبئة حقول تعديل الوظيفة
+// 4. دالة الإيقاف المؤقت أو إعادة التفعيل
 // ==========================================
-window.openEditJobModal = function (id, title, dept, type, salary, location, desc) {
+window.toggleJobStatus = async function (jobId, newStatus) {
+    const msg = newStatus === 'paused' 
+        ? "هل أنت متأكد من إيقاف نشر الوظيفة مؤقتاً؟" 
+        : "هل تريد إعادة تفعيل نشر الوظيفة في سوق العمل مجدداً؟";
+
+    if (confirm(msg)) {
+        try {
+            await updateDoc(doc(db, "jobs", jobId), { status: newStatus });
+            alert("تم تحديث حالة النشر بنجاح!");
+        } catch (error) {
+            console.error("Error toggling job status: ", error);
+        }
+    }
+}
+
+// ==========================================
+// 5. فتح الـ Modal وتعبئة الحقول بما فيها السكيلز كـ نص كومة
+// ==========================================
+window.openEditJobModal = function (id, title, dept, type, salary, location, desc, skillsString) {
     document.getElementById("editJobId").value = id;
     document.getElementById("editJobTitle").value = title;
     document.getElementById("editJobDepartment").value = dept;
@@ -155,18 +214,21 @@ window.openEditJobModal = function (id, title, dept, type, salary, location, des
     document.getElementById("editJobSalary").value = salary;
     document.getElementById("editJobLocation").value = location;
     document.getElementById("editJobDescription").value = desc;
+    document.getElementById("editJobSkills").value = skillsString; // تعبئة حقل المهارات المعدل
 
     const editModal = new bootstrap.Modal(document.getElementById('editJobModal'));
     editModal.show();
 }
 
 // ==========================================
-// 5. حفظ تعديلات بيانات الوظيفة
+// 6. حفظ تعديلات بيانات الوظيفة والمهارات المحولة
 // ==========================================
 document.getElementById("editJobForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const jobId = document.getElementById("editJobId").value;
+    const skillsInput = document.getElementById("editJobSkills").value;
+    const skillsArray = skillsInput.split(',').map(s => s.trim()).filter(s => s !== "");
     
     const updatedData = {
         title: document.getElementById("editJobTitle").value,
@@ -174,6 +236,7 @@ document.getElementById("editJobForm").addEventListener("submit", async function
         type: document.getElementById("editJobType").value,
         salary: parseFloat(document.getElementById("editJobSalary").value),
         location: document.getElementById("editJobLocation").value,
+        skills: skillsArray, // تحديث المصفوفة في الفايربيز
         description: document.getElementById("editJobDescription").value
     };
 
@@ -191,7 +254,7 @@ document.getElementById("editJobForm").addEventListener("submit", async function
 });
 
 // ==========================================
-// 6. دالة حذف الوظيفة
+// 7. دالة الحذف النهائي للوظيفة
 // ==========================================
 window.deleteJob = async function (jobId) {
     if (confirm("هل أنت متأكد من حذف هذه الوظيفة نهائياً؟")) {
@@ -205,7 +268,7 @@ window.deleteJob = async function (jobId) {
 }
 
 // ==========================================
-// 7. ربط أزرار الـ Pagination وتسجيل الخروج عند الـ Load
+// 8. ربط أزرار الـ Pagination وتسجيل الخروج
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("nextBtn").addEventListener("click", () => loadCompanyJobs('next'));
