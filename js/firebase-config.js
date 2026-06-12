@@ -7,13 +7,13 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-s
 
 // Your web app's Firebase configuration
 export const firebaseConfig = {
-  apiKey: "AIzaSyAUwb4-DZmljiF_LE2RMxeuITN2lNLooKg",
-  authDomain: "futurehire-d848c.firebaseapp.com",
-  projectId: "futurehire-d848c",
-  storageBucket: "futurehire-d848c.firebasestorage.app",
-  messagingSenderId: "254345155549",
-  appId: "1:254345155549:web:de172dcbec288f13239c34",
-  measurementId: "G-MZCPM0MGC2"
+  apiKey: "AIzaSyBDfGgI7SIf2nHkzta7bisKelgjWr0dqBw",
+  authDomain: "futurehire-ddef4.firebaseapp.com",
+  projectId: "futurehire-ddef4",
+  storageBucket: "futurehire-ddef4.firebasestorage.app",
+  messagingSenderId: "734408834610",
+  appId: "1:734408834610:web:90601cab4c2e07f1ba462b",
+  measurementId: "G-362Y0T4KXT"
 };
 
 // Initialize Firebase
