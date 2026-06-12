@@ -365,6 +365,9 @@ filterLocation.addEventListener("change", filterJobs);
 // ==========================================
 // 7. فتح موديول التقديم وإرسال الطلب
 // ==========================================
+// ==========================================
+// 7. فتح موديول التقديم وإرسال الطلب (التعديل لإصلاح الربط مع حسابي وطلباتي)
+// ==========================================
 window.openApplyModal = function(jobId, jobTitle, companyId, fullName) {
     window.currentApplyingJob = { jobId, jobTitle, companyId, fullName };
     const applyModal = new bootstrap.Modal(document.getElementById('applyJobModal'));
@@ -380,34 +383,52 @@ document.getElementById("submitApplicationForm")?.addEventListener("submit", asy
 
     if (!window.currentApplyingJob) return;
 
+    // جلب زر الإرسال لتعطيله مؤقتاً منعاً للتكرار
+    const submitBtn = e.target.querySelector("button[type='submit']");
+    if(submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> جاري الإرسال...`;
+    }
+
     try {
         await addDoc(collection(db, "applications"), {
+            // بيانات الوظيفة والشركة
             jobId: window.currentApplyingJob.jobId,
             jobTitle: window.currentApplyingJob.jobTitle,
             companyId: window.currentApplyingJob.companyId,
-            fullName: window.currentApplyingJob.fullName,
-            
-            applicantId: currentUser.uid,
+            fullName: window.currentApplyingJob.fullName,        // للشركة الحالية
+            companyName: window.currentApplyingJob.fullName,     // 👈 تم إضافتها لتقرأها صفحة "حسابي وطلباتي"
+
+            // بيانات الباحث عن عمل (المتقدم)
+            applicantId: currentUser.uid,                        // لصفحة الشركات
+            userId: currentUser.uid,                             // 👈 تم إضافتها لتقرأها صفحة "حسابي وطلباتي"
             applicantName: currentUser.fullName || currentUser.name || "مستخدم",
             applicantEmail: auth.currentUser.email,
             applicantPhone: phone,
             
+            // الروابط والحالة
             linkedin: linkedinUrl,
             cvUrl: cvUrl,
             status: "pending", 
-            createdAt: new Date()
+            createdAt: new Date(),                               // لصفحة الشركات
+            appliedAt: new Date().toISOString()                  // 👈 تم إضافتها لتقرأها صفحة "حسابي وطلباتي" باللغة العربية
         });
 
         alert("تم إرسال طلب التقديم بنجاح! بالتوفيق 👍");
         
         const modalEl = document.getElementById('applyJobModal');
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
-        modalInstance.hide();
+        if (modalInstance) modalInstance.hide();
         document.getElementById("submitApplicationForm").reset();
 
     } catch (error) {
         console.error("خطأ أثناء إرسال الطلب:", error);
         alert("فشل إرسال الطلب، حاول مرة أخرى.");
+    } finally {
+        if(submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="bi bi-send-check me-1"></i> إرسال الطلب الآن`;
+        }
     }
 });
 
