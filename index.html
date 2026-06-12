@@ -1,89 +1,145 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutureHire - مستقبل الوظائف بين يديك</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>الرئيسية - FutureHire</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body { background-color: #f8f9fa; font-family: system-ui, -apple-system, sans-serif; }
+        .navbar .nav-link { transition: all 0.2s; }
+        .navbar .nav-link:hover { background-color: #f8f9fa; color: #0d6efd !important; }
+        .hero-section { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; padding: 80px 0; border-bottom-left-radius: 50px; border-bottom-right-radius: 50px; }
+        .feature-card { border: none; border-radius: 12px; transition: transform 0.3s ease, box-shadow 0.3s ease; height: 100%; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+        .icon-box { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 28px; margin: 0 auto 20px; }
+    </style>
 </head>
+
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-3">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="index.html">Future<span class="text-white">Hire</span></a>
-            <button class="navbar-expand-lg navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="index.html">
+                <i class="bi bi-rocket-takeoff-fill"></i>
+                <span>FutureHire</span>
+            </a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="#hero">الرئيسية</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#challenge">التحدي</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#features">مميزات المنصة</a></li>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2 mt-3 mt-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active rounded-3 px-3 fw-semibold" href="index.html">
+                            <i class="bi bi-house-door me-1"></i> الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link rounded-3 px-3 fw-semibold" href="auth.html?mode=login">
+                            <i class="bi bi-compass me-1"></i> تصفح الوظائف
+                        </a>
+                    </li>
                 </ul>
-                <div class="d-flex gap-2">
-                    <a href="auth.html?mode=login" class="btn btn-outline-light btn-sm px-4">تسجيل الدخول</a>
-                    <a href="auth.html?mode=register" class="btn btn-primary btn-sm px-4">إنشاء حساب</a>
+                <div class="d-flex align-items-center gap-3 border-top pt-3 pt-lg-0 mt-3 mt-lg-0">
+                    <a href="auth.html?mode=login" class="btn btn-outline-primary rounded-2 px-3 fw-medium">تسجيل دخول</a>
+                    <a href="auth.html?mode=register" class="btn btn-primary rounded-2 px-3 fw-medium">إنشاء حساب</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <section id="hero" class="bg-dark text-white py-5 text-center text-lg-start d-flex align-items-center" style="min-height: 80vh;">
+    <div class="hero-section text-center text-lg-start mb-5 shadow-sm">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-3">اكتشف ملامح <span class="text-primary">سوق العمل المستقبلي</span></h1>
-                    <p class="lead text-muted mb-4">منصة ذكية ترسم لك خريطة الوظائف الناشئة، والمهارات المطلوبة، وتساعدك على مواكبة التحول الرقمي والذكاء الاصطناعي بنجاح.</p>
-                    <div class="d-flex justify-content-center justify-content-lg-start gap-3">
-                        <a href="auth.html?mode=register" class="btn btn-primary btn-lg px-4">ابدأ رحلتك الآن</a>
-                        <a href="#challenge" class="btn btn-outline-light btn-lg px-4">اكتشف المزيد</a>
+                <div class="col-lg-7">
+                    <h1 class="display-4 fw-bold mb-3">ابحث عن وظيفة أحلامك المستقبلية</h1>
+                    <p class="lead opacity-75 mb-4">منصة ذكية تربط بين الكفاءات والشركات الكبرى. تصفح مئات الوظائف المنشورة وقدم بضغطة زر.</p>
+                    <div class="d-flex gap-3 justify-content-center justify-content-lg-start">
+                        <a href="auth.html?mode=register" class="btn btn-light text-primary btn-lg px-4 fw-bold rounded-3">ابدأ رحلتك الآن</a>
+                        <a href="#features" class="btn btn-outline-light btn-lg px-4 fw-bold rounded-3">اكتشف المميزات</a>
                     </div>
                 </div>
-                <div class="col-lg-6 text-center mt-5 mt-lg-0">
-                    <img src="assets/images/hero-illustration.png" alt="Future Job Market" class="img-fluid rounded" onerror="this.src='https://via.placeholder.com/500x350?text=FutureHire+Dashboard'">
+                <div class="col-lg-5 text-center mt-5 mt-lg-0">
+                    <i class="bi bi-briefcase-fill text-white display-1 opacity-50 d-none d-lg-block"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="features" class="container mb-5 py-4">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-dark">لماذا منصة FutureHire؟</h2>
+            <p class="text-muted">نساعدك على مواكبة تحديات سوق العمل والتحول الرقمي بنجاح</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-box bg-danger-subtle text-danger">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">وظائف المستقبل</h4>
+                    <p class="text-muted small mb-0">نستعرض لك أحدث الوظائف الرقمية والناشئة المتوافقة مع متطلبات الثورة الصناعية والذكاء الاصطناعي.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-box bg-primary-subtle text-primary">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">بحث وفلترة متقدم</h4>
+                    <p class="text-muted small mb-0">نظام فلترة فوري يتيح لك البحث عن الوظائف حسب المسمى الوظيفي، المدينة، نوع الدوام، أو المهارات المطلوبة بسهولة.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-box bg-success-subtle text-success">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">سهولة التقديم</h4>
+                    <p class="text-muted small mb-0">استمارة تقديم سريعة ومدمجة تسمح لك بإرسال سيرتك الذاتية، روابط حساباتك، ورقم هاتفك بضغطة زر مباشرة للشركة.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-box bg-warning-subtle text-warning">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">متابعة فورية للطلبات</h4>
+                    <p class="text-muted small mb-0">لوحة تحكم مخصصة تتيح لك مراجعة وتتبع حالة طلبات التقديم الخاصة بك (قيد الانتظار، مقبول، أو مرفوض) لحظة بلحظة.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-box bg-info-subtle text-info">
+                        <i class="bi bi-building-add"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">دعم جهات العمل والشركات</h4>
+                    <p class="text-muted small mb-0">بيئة متكاملة تتيح للشركات إضافة الوظائف الشاغرة، استعراض المتقدمين، وإدارتهم بمرونة تامة.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-box bg-secondary-subtle text-secondary">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">حسابات آمنة وموثوقة</h4>
+                    <p class="text-muted small mb-0">تسجيل دخول آمن ومصادقة مدعومة بالكامل لحماية بياناتك الشخصية والمهنية.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="challenge" class="py-5 bg-light">
-        <div class="container text-center">
-            <h2 class="fw-bold mb-5">التحدي الحقيقي في سوق العمل</h2>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm p-4">
-                        <div class="icon-box bg-danger-subtle text-danger rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                            <i class="fa-solid fa-robot fa-2x"></i>
-                        </div>
-                        <h3 class="fw-bold text-danger">92 مليون</h3>
-                        <p class="text-muted">وظيفة معرضة للاختفاء تماماً بحلول عام 2030 بسبب الأتمتة والتحول الرقمي السريع.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm p-4">
-                        <div class="icon-box bg-success-subtle text-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                            <i class="fa-solid fa-briefcase fa-2x"></i>
-                        </div>
-                        <h3 class="fw-bold text-success">170 مليون</h3>
-                        <p class="text-muted">وظيفة جديدة ستنشأ في مجالات التكنولوجيا الناشئة والذكاء الاصطناعي تتطلب مهارات حديثة.</p>
-                    </div>
-                </div>
-                <div class="col-md-12 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm p-4 d-flex flex-column justify-content-center">
-                        <h4 class="fw-bold mb-3">أين الحل؟</h4>
-                        <p class="text-muted">هنا يأتي دور **FutureHire** ليجمع الداتا في مكان واحد، ويساعد الطلاب على اختيار تخصصاتهم، والموظفين على إعادة توجيه مهاراتهم.</p>
-                    </div>
-                </div>
-            </div>
+    <footer class="bg-white text-center py-4 border-top mt-auto">
+        <div class="container">
+            <p class="mb-0 text-muted small">جميع الحقوق محفوظة &copy; 2026 - منصة FutureHire</p>
         </div>
-    </section>
-
-    <footer class="bg-dark text-white text-center py-4 border-top border-secondary">
-        <p class="mb-0">جميع الحقوق محفوظة &copy; 2026 - منصة FutureHire</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
